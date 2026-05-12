@@ -5,10 +5,10 @@ services:
     ports:
       - "8080:80"
     environment:
-      DB_HOSTNAME: db
-      DB_USERNAME: opencart
-      DB_PASSWORD: opencart
-      DB_DATABASE: opencart
+      - DB_HOSTNAME=db
+      - DB_USERNAME=opencart
+      - DB_PASSWORD=opencart
+      - DB_DATABASE=opencart
     volumes:
       - opencart:/var/www/html
     depends_on:
