@@ -4,24 +4,7 @@ services:
     build: .
     ports:
       - "8080:80"
-    environment:
-      - DB_HOSTNAME=db
-      - DB_USERNAME=opencart
-      - DB_PASSWORD=opencart
-      - DB_DATABASE=opencart
     volumes:
       - opencart:/var/www/html
-    depends_on:
-      - db
-  db:
-    image: mysql:8.0
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: opencart
-      MYSQL_USER: opencart
-      MYSQL_PASSWORD: opencart
-    volumes:
-      - db:/var/lib/mysql
 volumes:
   opencart:
-  db:
