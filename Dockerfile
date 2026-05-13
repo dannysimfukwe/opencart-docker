@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y \
 
 COPY --chown=www-data:www-data upload /var/www/html
 
+COPY cleanup.php /var/www/html/cleanup.php
+
 RUN cp /var/www/html/.htaccess.txt /var/www/html/.htaccess && \
     sed -i 's|AllowOverride None|AllowOverride All|g' /etc/apache2/apache2.conf
 
