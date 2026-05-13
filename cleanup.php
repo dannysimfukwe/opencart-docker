@@ -3,18 +3,17 @@
  * OpenCart Post-Install Cleanup
  * Usage: Visit https://your-site.com/cleanup.php in your browser.
  *
- * Detects install completion by checking if config.php exists and install folder exists.
+ * Detects install completion by checking if config files exist (installation was done).
  */
 
 $installDir = '/var/www/html/install';
 $configFile = '/var/www/html/config.php';
 $adminConfigFile = '/var/www/html/admin/config.php';
 
-$installDone = !is_dir($installDir);
 $configExists = file_exists($configFile) && filesize($configFile) > 0;
 $adminConfigExists = file_exists($adminConfigFile) && filesize($adminConfigFile) > 0;
 
-if ($installDone && $configExists && $adminConfigExists) {
+if ($configExists && $adminConfigExists) {
     $installComplete = true;
 } else {
     $installComplete = false;
@@ -28,8 +27,8 @@ $CONFIRM = isset($_GET['confirm']) && $_GET['confirm'] === 'yes';
 
 if (!$CONFIRM) {
     $installStat = is_dir($installDir) 
-        ? '<span style="color:#856404;font-weight:bold">⚠ Still present — will be removed</span>'
-        : '<span style="color:green;font-weight:bold">✔ Removed</span>';
+        ? '<span style="color:#856404;font-weight:bold">⚠ Present — will be removed</span>'
+        : '<span style="color:green;font-weight:bold">✔ Already removed</span>';
 
     echo '<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>OpenCart Cleanup</title>
@@ -42,9 +41,9 @@ td{padding:6px 10px;border-bottom:1px solid #ffeaa7;font-size:14px}
 </style></head><body>
 <h1>⚡ OpenCart Post-Install Cleanup</h1>
 <table>
-<tr><td><strong>Install folder</strong></td><td>' . $installStat . '</td></tr>
 <tr><td><strong>config.php</strong></td><td>' . ($configExists ? '<span style="color:green">✔ Exists</span>' : '<span style="color:red">✘ Missing</span>') . '</td></tr>
 <tr><td><strong>admin/config.php</strong></td><td>' . ($adminConfigExists ? '<span style="color:green">✔ Exists</span>' : '<span style="color:red">✘ Missing</span>') . '</td></tr>
+<tr><td><strong>Install folder</strong></td><td>' . $installStat . '</td></tr>
 </table>
 <p>This will delete the <code>/install</code> folder to secure your installation.</p>
 <div class="row"><strong>Ready? <a href="?confirm=yes" class="btn">Run Cleanup →</a></strong></div>
