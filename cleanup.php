@@ -2,8 +2,6 @@
 /**
  * OpenCart Post-Install Cleanup
  * Usage: Visit https://your-site.com/cleanup.php in your browser.
- *
- * Detects install completion by checking if config files exist (installation was done).
  */
 
 $installDir = '/var/www/html/install';
@@ -13,20 +11,16 @@ $adminConfigFile = '/var/www/html/admin/config.php';
 $configExists = file_exists($configFile) && filesize($configFile) > 0;
 $adminConfigExists = file_exists($adminConfigFile) && filesize($adminConfigFile) > 0;
 
-if ($configExists && $adminConfigExists) {
-    $installComplete = true;
-} else {
-    $installComplete = false;
-}
-
-if (!$installComplete) {
+if (!$configExists || !$adminConfigExists) {
     die('Installation not complete yet. Please finish the install wizard first, then revisit this page.');
 }
 
 $CONFIRM = isset($_GET['confirm']) && $_GET['confirm'] === 'yes';
 
 if (!$CONFIRM) {
-    $installStat = is_dir($installDir) 
+    clearstatcache();
+    $installExists = is_dir($installDir);
+    $installStat = $installExists 
         ? '<span style="color:#856404;font-weight:bold">⚠ Present — will be removed</span>'
         : '<span style="color:green;font-weight:bold">✔ Already removed</span>';
 
@@ -41,8 +35,8 @@ td{padding:6px 10px;border-bottom:1px solid #ffeaa7;font-size:14px}
 </style></head><body>
 <h1>⚡ OpenCart Post-Install Cleanup</h1>
 <table>
-<tr><td><strong>config.php</strong></td><td>' . ($configExists ? '<span style="color:green">✔ Exists</span>' : '<span style="color:red">✘ Missing</span>') . '</td></tr>
-<tr><td><strong>admin/config.php</strong></td><td>' . ($adminConfigExists ? '<span style="color:green">✔ Exists</span>' : '<span style="color:red">✘ Missing</span>') . '</td></tr>
+<tr><td><strong>config.php</strong></td><td><span style="color:green">✔ Exists</span></td></tr>
+<tr><td><strong>admin/config.php</strong></td><td><span style="color:green">✔ Exists</span></td></tr>
 <tr><td><strong>Install folder</strong></td><td>' . $installStat . '</td></tr>
 </table>
 <p>This will delete the <code>/install</code> folder to secure your installation.</p>
@@ -51,14 +45,12 @@ td{padding:6px 10px;border-bottom:1px solid #ffeaa7;font-size:14px}
     exit;
 }
 
-$results = [];
+clearstatcache();
 
-if (is_dir($installDir)) {
-    shell_exec("rm -rf " . escapeshellarg($installDir));
-    $results[] = [is_dir($installDir) ? '✘' : '✔', '/install folder ' . (is_dir($installDir) ? 'FAILED to remove' : 'removed')];
-} else {
-    $results[] = ['⚪', '/install folder already gone'];
-}
+exec("rm -rf " . escapeshellarg($installDir) . " 2>&1", $out, $ret);
+
+clearstatcache();
+$stillExists = is_dir($installDir);
 
 $siteUrl = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/';
 ?>
@@ -70,9 +62,7 @@ h1{color:#155724}.item{font-size:16px}.ok{color:green}.fail{color:red}a{color:#0
 </style></head><body>
 <h1>✅ Cleanup Complete</h1>
 <p>Results:</p>
-<?php foreach ($results as [$icon, $msg]): ?>
-<p class="item"><span class="<?= str_contains($icon,'✔')?'ok':'fail' ?>"><?= $icon ?> <?= $msg ?></span></p>
-<?php endforeach; ?>
+<p class="item"><span class="<?= $stillExists ? 'fail' : 'ok' ?>"><?= $stillExists ? '✘' : '✔' ?> /install folder <?= $stillExists ? 'FAILED to remove' : 'removed' ?></span></p>
 <p style="margin-top:24px"><a href="<?= $siteUrl ?>">← Back to your site</a></p>
 </body></html>
 <?php
