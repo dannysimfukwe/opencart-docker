@@ -17,7 +17,9 @@ RUN apt-get update && apt-get install -y \
 COPY --chown=www-data:www-data upload /var/www/html
 
 RUN cp /var/www/html/config-dist.php /var/www/html/config.php && \
+    cp /var/www/html/admin/config-dist.php /var/www/html/admin/config.php && \
     cp /var/www/html/.htaccess.txt /var/www/html/.htaccess && \
+    chmod 644 /var/www/html/config.php /var/www/html/admin/config.php && \
     sed -i 's|AllowOverride None|AllowOverride All|g' /etc/apache2/apache2.conf
 
 EXPOSE 80
